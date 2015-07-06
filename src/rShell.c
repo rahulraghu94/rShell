@@ -238,18 +238,18 @@ void sig_child(int signo)
 int main(int argc, char **argv, char **envp)
 {
         init();
-        welcomeScreen();
-        shellPrompt();
+        welcome_screen();
+        shell_prompt();
         while (TRUE) {
                 userInput = getchar();
                 switch (userInput) {
                 case '\n':
-                        shellPrompt();
+                        shell_prompt();
                         break;
                 default:
-                        getTextLine();
-                        handleUserCommand();
-                        shellPrompt();
+                        get_line();
+                        handle_command();
+                        shell_prompt();
                         break;
                 }
         }
