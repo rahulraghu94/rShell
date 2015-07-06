@@ -22,50 +22,50 @@ typedef struct job {
 
 static t_job* jobsList = NULL;
 
-static pid_t MSH_PID;
-static pid_t MSH_PGID;
-static int MSH_TERMINAL, MSH_IS_INTERACTIVE;
-static struct termios MSH_TMODES;
+static pid_t RSHELL_PID;
+static pid_t RSHELL_PGID;
+static int RSHELL_TERMINAL, RSHELL_IS_INTERACTIVE;
+static struct termios RSHELL_TMODES;
 
-void pipeing(int);
+void pipeline(int);
 void getNextLine();
 
-void makeCommand();
+void make_command();
 
-void clearCommand();
+void clear_command();
 
-t_job * insertJob(pid_t pid, pid_t pgid, char* name, char* descriptor,
+t_job * insert_job(pid_t pid, pid_t pgid, char* name, char* descriptor,
                   int status);
 
-t_job* delJob(t_job* job);
+t_job* del_job(t_job* job);
 
-t_job* getJob(int searchValue, int searchParameter);
+t_job* get_job(int searchValue, int searchParameter);
 
 //void printJobs();
 
-void HelloScreen();
+void hello_creen();
 
-void shellPrompt();
-void handleUserCommand();
+void shell_prompt();
+void handle_command();
 
-int checkBuiltInCommands();
+int check_built_in_commands();
 
-void executeCommand(char *command[], char *file, int newDescriptor,
+void exec_ommand(char *command[], char *file, int newDescriptor,
                     int executionMode);
 
-void launchJob(char *command[], char *file, int newDescriptor,
+void exec_Job(char *command[], char *file, int newDescriptor,
                int executionMode);
 
-void putJobForeground(t_job* job, int continueJob);
+void put_foreground(t_job* job, int continueJob);
 
-void putJobBackground(t_job* job, int continueJob);
+void put_background(t_job* job, int continueJob);
 
-void waitJob(t_job* job);
+void wait_for_job(t_job* job);
 
-void killJob(int jobId);
+void kill_ob(int jobId);
 
-void changeDirectory();
+void change_dir();
 
 void init();
 
-void signalHandler_child(int p);
+void sig_child(int p);

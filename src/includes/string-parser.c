@@ -1,4 +1,4 @@
-void getNextLine()
+void get_line()
 {
         destroyCommand();
         while ((userInput != '\n') && (bufferChars < BUFFER_MAX_LENGTH)) {
@@ -9,7 +9,7 @@ void getNextLine()
         populateCommand();
 }
 
-void makeCommand()
+void make_command()
 {
         char* bufferPointer;
         bufferPointer = strtok(buffer, " ");
@@ -20,7 +20,7 @@ void makeCommand()
         }
 }
 
-void clearCommand()
+void clear_command()
 {
         while (commandArgc != 0) {
                 commandArgv[commandArgc] = NULL;
