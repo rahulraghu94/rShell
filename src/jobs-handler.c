@@ -1,3 +1,10 @@
+#ifndef _JOB_HANDLER_
+    #define _JOB_HANDLER_
+
+
+#include "rShell.h"
+
+
 t_job* insert_job(pid_t pid, pid_t pgid, char* name, char* descriptor,
                  int status)
 {
@@ -114,3 +121,5 @@ t_job* get_job(int searchValue, int searchParameter)
         }
         return NULL;
 }
+
+#endif
