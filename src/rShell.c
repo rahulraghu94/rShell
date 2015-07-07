@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include "rShell.h"
+#include "rshell-defs.h"
+
 #define MAXLINE 200
 
 void kill_job(int jobId)
@@ -14,6 +16,8 @@ void kill_job(int jobId)
 void exec_job(char *command[], char *file, int newDescriptor,
               int executionMode)
 {
+        printf("Job being execed!");
+        fflush(NULL);
         pid_t pid;
         pid = fork();
         switch (pid) {
@@ -60,9 +64,15 @@ void exec_job(char *command[], char *file, int newDescriptor,
 
 int check_built_in_commands()
 {
+        printf("%s boooooo", commandArgv[0]);
+        printf("Built in being checked");
+        fflush(NULL);
         if (strcmp("exit", commandArgv[0]) == 0) {
                 exit(EXIT_SUCCESS);
         }
+
+        printf("Booboo");
+        fflush(NULL);
         if (strcmp("cd", commandArgv[0]) == 0) {
 
                 change_dir();
@@ -114,14 +124,15 @@ int check_built_in_commands()
             }
         }
         if( commandArgc > 3 )
-{
+        {
                 if(strcmp("|", commandArgv[commandArgc-2]) == 0 )
                 {
                         pipeline(commandArgc-1);
                         return 1;
                 }
         }
- 
+        printf("Returning 0 from build check");
+        fflush(NULL);
         return 0;
 }
 
@@ -132,27 +143,16 @@ int check_built_in_commands()
  */
 void handle_command()
 {
+        printf("Command being handles!");
+        fflush(NULL);
         if (check_built_in_commands() == 0) {
+                printf("Exec being called?");
+                fflush(NULL);
                 exec_job(commandArgv, "STANDARD", 0, FOREGROUND);
         }
 }
 
-/*
- * Prints welcome screen and general instructions
- */
-void hello_screen()
-{
-	printf("Welcome to rShell!");
-}
 
-
-/*
- * still can't pick a symbol. $ was an excelent choice, linus. Douche.
- */
-void shell_prompt()
-{
-        printf("[%s] : ",getcwd(currentDirectory, 1024));
-}
 
 /* 
  * If | character found, use popen and pclose system calls to implement
@@ -298,11 +298,6 @@ void init()
         }
 }
 
-void sig_child(int signo)
-{
-	printf("Have no fucking clue about this.");
-}
-
 int main(int argc, char **argv, char **envp)
 {
         init();
@@ -325,4 +320,42 @@ int main(int argc, char **argv, char **envp)
         }
         printf("\n");
         return 0;
+}
+
+void sig_child(int p)
+{
+        pid_t pid;
+        int terminationStatus;
+        pid = waitpid(WAIT_ANY, &terminationStatus, WUNTRACED | WNOHANG);
+        if (pid > 0) {
+                t_job* job = get_job(pid, BY_PROCESS_ID);
+                if (job == NULL)
+                        return;
+                if (WIFEXITED(terminationStatus)) {
+                        if (job->status == BACKGROUND) {
+                                printf("\n[%d]+  Done\t   %s\n", job->id, job->name);
+                                jobsList = del_job(job);
+                        }
+                } else if (WIFSIGNALED(terminationStatus)) {
+                        printf("\n[%d]+  KILLED\t   %s\n", job->id, job->name);
+                        jobsList = del_job(job);
+                } else if (WIFSTOPPED(terminationStatus)) {
+                        if (job->status == BACKGROUND) {
+                                tcsetpgrp(RSHELL_TERMINAL, RSHELL_PGID);
+                                change_job_status(pid, WAITING_INPUT);
+                                printf("\n[%d]+   suspended [wants input]\t   %s\n",
+                                       numActiveJobs, job->name);
+                        } else {
+                                tcsetpgrp(RSHELL_TERMINAL, job->pgid);
+                                change_job_status(pid, SUSPENDED);
+                                printf("\n[%d]+   stopped\t   %s\n", numActiveJobs, job->name);
+                        }
+                        return;
+                } else {
+                        if (job->status == BACKGROUND) {
+                                jobsList = del_job(job);
+                        }
+                }
+                tcsetpgrp(RSHELL_TERMINAL, RSHELL_PGID);
+        }
 }

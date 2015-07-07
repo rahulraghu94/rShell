@@ -1,9 +1,47 @@
-#ifndef _JOB_HANDLER_
-    #define _JOB_HANDLER_
+#ifndef _RSHELL_DEFINITIONS_
+	#define _RSHELL_DEFINITIONS_
 
+void get_line()
+{
+        printf("Command reading...\n");
+        fflush(NULL);
+        clear_command();
+        while ((userInput != '\n') && (bufferChars < BUFFER_MAX_LENGTH)) {
+                buffer[bufferChars++] = userInput;
+                userInput = getchar();
+        }
+        buffer[bufferChars] = 0x00;
+        printf("Comand done reading: %s", commandArgv[0]);
+        make_command();
+}
 
-#include "rShell.h"
+void make_command()
+{
+        int i;
+        printf("Command making");
+        fflush(NULL);
+        char* bufferPointer;
+        bufferPointer = strtok(buffer, " ");
+        while (bufferPointer != NULL) {
+                commandArgv[commandArgc] = bufferPointer;
+                bufferPointer = strtok(NULL, " ");
+                commandArgc++;
+        }
 
+        for(i=0; i< commandArgc; i++) {
+                printf("%s why this not work\t", commandArgv[i]);
+                fflush(NULL);
+        }
+}
+
+void clear_command()
+{
+        while (commandArgc != 0) {
+                commandArgv[commandArgc] = NULL;
+                commandArgc--;
+        }
+        bufferChars = 0;
+}
 
 t_job* insert_job(pid_t pid, pid_t pgid, char* name, char* descriptor,
                  int status)
@@ -120,6 +158,23 @@ t_job* get_job(int searchValue, int searchParameter)
                 break;
         }
         return NULL;
+}
+
+/*
+ * Prints welcome screen and general instructions
+ */
+void hello_screen()
+{
+	printf("Welcome to rShell!");
+}
+
+
+/*
+ * still can't pick a symbol. $ was an excelent choice, linus. Douche.
+ */
+void shell_prompt()
+{
+        printf("[%s] : ",getcwd(currentDirectory, 1024));
 }
 
 #endif

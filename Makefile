@@ -2,7 +2,7 @@
 
 all: src/rShell.c jobs-handler.o string-parser.o 
 	-@mkdir build
-	gcc src/rShell.c src/*.o -o build/rShell.out
+	gcc -g src/rShell.c src/*.o -o build/rShell.out
 
 jobs-handler.o: src/jobs-handler.c
 	gcc -c src/jobs-handler.c -o src/jobs-handler.o

@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -10,6 +11,9 @@
 
 #ifndef _RSHELL_
     #define _RSHELL_
+
+static char *commandArgv[5];
+static int commandArgc = 0;
 
 
 #define FALSE 0
@@ -28,17 +32,23 @@
 #define BY_PROCESS_ID 1
 #define BY_JOB_ID 2
 #define BY_JOB_STATUS 3
+#define BUFFER_MAX_LENGTH 500
+
 
 static int numActiveJobs = 0;
 
-#define BUFFER_MAX_LENGTH 50
 static char* currentDirectory;
 static char userInput = '\0';
 static char buffer[BUFFER_MAX_LENGTH];
 static int bufferChars = 0;
 
-static char *commandArgv[5];
-static int commandArgc = 0;
+
+
+static pid_t RSHELL_PID;
+static pid_t RSHELL_PGID;
+static int RSHELL_TERMINAL, RSHELL_IS_INTERACTIVE;
+static struct termios RSHELL_TMODES;
+
 
 typedef struct job {
         int id;
@@ -51,11 +61,6 @@ typedef struct job {
 } t_job;
 
 static t_job* jobsList = NULL;
-
-static pid_t RSHELL_PID;
-static pid_t RSHELL_PGID;
-static int RSHELL_TERMINAL, RSHELL_IS_INTERACTIVE;
-static struct termios RSHELL_TMODES;
 
 void pipeline(int);
 void get_line();
