@@ -10,15 +10,25 @@
 #include <termios.h>
 #include "rShell.h"
 
+/*
+ * External declarations of variables from rShell.h
+ */
 extern char *commandArgv[5];
 extern char* currentDirectory;
 extern char buffer[BUFFER_MAX_LENGTH];
 extern char userInput;
 extern int bufferChars;
 extern int commandArgc;
-
 extern t_job *jobsList;
 
+/*
+ * make_command purpose is to populate commandArgv[], which stores different tokens 
+ * of an input command, by using c built-in tokenizer strtok().
+ * The entered user string is broken down across the " " delimiter and stored
+ * as serperate strings for processing.
+ * Current limitation is 5 tokens per command.
+ * Command string neads to be cleared before use
+ */
 void make_command()
 {
         int i;
@@ -32,6 +42,9 @@ void make_command()
 
 }
 
+/*
+ * clear_command resets the argc count and clears the string for command
+ */
 void clear_command()
 {
         while (commandArgc != 0) {
@@ -41,6 +54,10 @@ void clear_command()
         bufferChars = 0;
 }
 
+/*
+ * Queries the user for a new command. Initially clear the command, reads the entire 
+ * buffer string, and calls make_command.
+ */
 void get_line()
 {
         clear_command();
@@ -52,6 +69,11 @@ void get_line()
         make_command();
 }
 
+/*
+ * A new job is inserted and scheduled through the jobsList queue. 
+ * A new job is allocated a memory block to holds it essentian informaation
+ * such as name, ID's, status etc. 
+ */
 t_job* insert_job(pid_t pid, pid_t pgid, char* name, char* descriptor,
                  int status)
 {
@@ -83,7 +105,9 @@ t_job* insert_job(pid_t pid, pid_t pgid, char* name, char* descriptor,
         }
 }
 
-
+/*
+ * Job statuc gets changes via pid to the passed status parameter
+ */
 int change_job_status(int pid, int status)
 {
         usleep(10000);
@@ -104,6 +128,9 @@ int change_job_status(int pid, int status)
         }
 }
 
+/* Remove jobs from the pool after completion or upon unwanted/wanted termination.
+ * Waiting parent process is woken up here.
+ */
 t_job* del_job(t_job* job)
 {
         usleep(10000);
@@ -133,6 +160,9 @@ t_job* del_job(t_job* job)
         return jobsList;
 }
 
+/* Fetches a job from the job pool using a parameter and value.
+ * car must be taken to ensure values passed are unique
+ */
 t_job* get_job(int searchValue, int searchParameter)
 {
         usleep(10000);
@@ -176,5 +206,21 @@ void hello_screen()
 
 void prompt()
 {
-        printf("\n%s : ",getcwd(currentDirectory, 1024));
+        char *save_pointer;
+        char *p, *val;
+        char *buff = getenv("PWD");
+        char *who = getenv("USER");
+        getlogin_r(who, 10);
+
+        p = strtok_r(buff, "/", &save_pointer);
+    
+    while(p!=NULL)
+    {
+        p = strtok_r(NULL, "/", &save_pointer);
+        if(p != NULL)
+            val = p;
+    }
+
+
+        printf("[%s@natasha %s]> ",who, getenv("PWD"));
 }

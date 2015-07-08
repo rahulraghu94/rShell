@@ -49,7 +49,12 @@ void handle_command()
         }
 }
 
-
+/* 
+ * Pipelining is acheived by simple use of popen and pclose
+ * interprocess communication tools. The acccepted value is a flag
+ * which indicates the number of levels of pipelinine to be done.
+ * supports up to 5 levels of pipelining.
+ */
  void pipeline(int flag)
  {
     char    line[MAXLINE];
@@ -91,7 +96,18 @@ void handle_command()
         printf("pclose error\n");
 }
 
-
+/*
+ * tl;dr this :P
+ * The PID of any of the signals childs are returns through the 
+ * waitpid system call with a WAIT_ANY flag set. The pid of that 
+ * child is returned. Using this PID, the shell is queried for the
+ * jobs node. The returned job is checked for on of the following conditions:
+ * 
+ * 1) If Backgroud job and exitted: simply remoe it from the pool
+ * 2) If signalled by kernel, remove from pool and clean up.
+ * 3) If stopped, set status as waiting (mostly for user i/p) and take over session.
+ * 4) Else, place it as suspended, take over session and process nect job.
+ */  
 void signalHandler_child(int p)
 {
         pid_t pid;
@@ -130,7 +146,14 @@ void signalHandler_child(int p)
         }
 }
 
-
+/* 
+ * Built in commands and checked by a small grounp of if statements 
+ * match the given input. The shell itself executes these command.
+ * There is no context switch to kernel space, and control lies
+ * within shell space. Usage of built-in commands on super user
+ * space requires acess permissions. Run hell in sudo. 
+ * WITH CAUTION!
+ */
 int check_built_in_commands()
 {
         if (strcmp("exit", commandArgv[0]) == 0) {
@@ -209,6 +232,10 @@ int check_built_in_commands()
         return 0;
 }
 
+/*
+ * Here, we simply provide file descriptors for input and out put so that
+ * are taken and arrive on the same terminal / console. 
+ */
 void exec_command(char *command[], char *file, int newDescriptor,
                     int executionMode)
 {
@@ -227,6 +254,13 @@ void exec_command(char *command[], char *file, int newDescriptor,
                 perror("RSHELL");
 }
 
+/*
+ * Job is to be lay=unched after verification that we are nt=ot 
+ * trying to execute a built-in command, as they are done by the shell 
+ * itself. Once checked, we issue the command to launch_job that forks,
+ * sets up signal handlers and allows the child to complete the task.
+ * The parent waits for the child to return with status.
+ */
 void launch_job(char *command[], char *file, int newDescriptor,
                int executionMode)
 {
@@ -270,6 +304,12 @@ void launch_job(char *command[], char *file, int newDescriptor,
         }
 }
 
+/*
+ * Used to allow the current process to become the fore ground 
+ * process by becoming a sessions leader. Sessions leader access is 
+ * gained by tscetpgrp function. Functionality to bring a current 
+ * job in background to foreground not tested yet.
+ */
 void put_foreground(t_job* job, int continueJob)
 {
         job->status = FOREGROUND;
@@ -283,6 +323,10 @@ void put_foreground(t_job* job, int continueJob)
         tcsetpgrp(RSHELL_TERMINAL, RSHELL_PGID);
 }
 
+/*
+ * Places the ongoing job in the background.
+ * Usus the defined macro BACKGROUND.
+ */
 void put_background(t_job* job, int continueJob)
 {
         if (job == NULL)
@@ -297,6 +341,11 @@ void put_background(t_job* job, int continueJob)
         tcsetpgrp(RSHELL_TERMINAL, RSHELL_PGID);
 }
 
+/* 
+ * Causes parent, i.e, the current process, that spawned a child to complete
+ * a job, to wait for the child to complete execution and return an exit status.
+ * The signal handler sid_child handles signals of a child process.
+ */
 void wait_job(t_job* job)
 {
         int terminationStatus;
@@ -307,12 +356,18 @@ void wait_job(t_job* job)
         jobsList = del_job(job);
 }
 
+/*
+ * kill a job and remove from queue
+ */
 void kill_job(int jobId)
 {
         t_job *job = get_job(jobId, BY_JOB_ID);
         kill(job->pid, SIGKILL);
 }
 
+/*
+ * Simple implementation of cd Command as an internal command.
+ */
 void change_dir()
 {
         if (commandArgv[1] == NULL) {
@@ -324,7 +379,11 @@ void change_dir()
         }
 }
 
-
+/*
+ * initialize the shell with terminals, file despcriptors etc.
+ * Set up signl masks and callback functions to handle signals.
+ * Setup directories
+ */
 void init()
 {
         RSHELL_PID = getpid();

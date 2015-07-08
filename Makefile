@@ -1,4 +1,4 @@
-CFLAGS=-g -O2
+CFLAGS=-g -w -O2
 
 all: src/rShell.c rShell-defs.o 
 	-@mkdir build
