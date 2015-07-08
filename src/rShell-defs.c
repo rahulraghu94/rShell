@@ -1,25 +1,27 @@
-#ifndef _RSHELL_DEFINITIONS_
-	#define _RSHELL_DEFINITIONS_
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <signal.h>
+#include <sys/wait.h>
+#include <fcntl.h>
+#include <termios.h>
+#include "rShell.h"
 
-void get_line()
-{
-        printf("Command reading...\n");
-        fflush(NULL);
-        clear_command();
-        while ((userInput != '\n') && (bufferChars < BUFFER_MAX_LENGTH)) {
-                buffer[bufferChars++] = userInput;
-                userInput = getchar();
-        }
-        buffer[bufferChars] = 0x00;
-        printf("Comand done reading: %s", commandArgv[0]);
-        make_command();
-}
+extern char *commandArgv[5];
+extern char* currentDirectory;
+extern char buffer[BUFFER_MAX_LENGTH];
+extern char userInput;
+extern int bufferChars;
+extern int commandArgc;
+
+extern t_job *jobsList;
 
 void make_command()
 {
         int i;
-        printf("Command making");
-        fflush(NULL);
         char* bufferPointer;
         bufferPointer = strtok(buffer, " ");
         while (bufferPointer != NULL) {
@@ -28,10 +30,6 @@ void make_command()
                 commandArgc++;
         }
 
-        for(i=0; i< commandArgc; i++) {
-                printf("%s why this not work\t", commandArgv[i]);
-                fflush(NULL);
-        }
 }
 
 void clear_command()
@@ -41,6 +39,17 @@ void clear_command()
                 commandArgc--;
         }
         bufferChars = 0;
+}
+
+void get_line()
+{
+        clear_command();
+        while ((userInput != '\n') && (bufferChars < BUFFER_MAX_LENGTH)) {
+                buffer[bufferChars++] = userInput;
+                userInput = getchar();
+        }
+        buffer[bufferChars] = 0x00;
+        make_command();
 }
 
 t_job* insert_job(pid_t pid, pid_t pgid, char* name, char* descriptor,
@@ -160,21 +169,12 @@ t_job* get_job(int searchValue, int searchParameter)
         return NULL;
 }
 
-/*
- * Prints welcome screen and general instructions
- */
 void hello_screen()
 {
-	printf("Welcome to rShell!");
+        printf("Rahuls shell. :P\n\n");
 }
 
-
-/*
- * still can't pick a symbol. $ was an excelent choice, linus. Douche.
- */
-void shell_prompt()
+void prompt()
 {
-        printf("[%s] : ",getcwd(currentDirectory, 1024));
+        printf("\n%s : ",getcwd(currentDirectory, 1024));
 }
-
-#endif
