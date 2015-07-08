@@ -361,8 +361,8 @@ void wait_job(t_job* job)
  */
 void kill_job(int jobId)
 {
-        t_job *job = get_job(jobId, BY_JOB_ID);
-        kill(job->pid, SIGKILL);
+        //t_job *job = get_job(jobId, BY_JOB_ID);
+        kill(jobId, SIGKILL);
 }
 
 /*
