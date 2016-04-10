@@ -40,7 +40,7 @@ char *commandArgv[5];
 char* currentDirectory;
 char buffer[BUFFER_MAX_LENGTH];
 
-extern t_job *jobsList = NULL;
+t_job *jobsList = NULL;
 
 void handle_command()
 {
@@ -112,6 +112,7 @@ void signalHandler_child(int p)
 {
         pid_t pid;
         int terminationStatus;
+
         pid = waitpid(WAIT_ANY, &terminationStatus, WUNTRACED | WNOHANG);
         if (pid > 0) {
                 t_job* job = get_job(pid, BY_PROCESS_ID);
@@ -131,6 +132,7 @@ void signalHandler_child(int p)
                                 change_job_status(pid, WAITING_INPUT);
                                 printf("\n[%d]+   suspended [wants input]\t   %s\n",
                                        numActiveJobs, job->name);
+                                prompt();
                         } else {
                                 tcsetpgrp(RSHELL_TERMINAL, job->pgid);
                                 change_job_status(pid, SUSPENDED);

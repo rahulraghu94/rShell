@@ -210,9 +210,14 @@ void prompt()
         char *p, *val;
         char *buff = getenv("PWD");
         char *who = getenv("USER");
+        char name[120];
+        char wd[120];
         getlogin_r(who, 10);
 
         p = strtok_r(buff, "/", &save_pointer);
+
+        gethostname(name, sizeof(name));
+        getcwd(wd, sizeof(wd));
     
     while(p!=NULL)
     {
@@ -222,5 +227,6 @@ void prompt()
     }
 
 
-        printf("[%s@natasha %s]> ",who, getenv("PWD"));
+    printf("[%s@%s %s]> ",who, name, wd);
+        fflush(NULL);
 }

@@ -23,6 +23,6 @@ typedef struct job {
         struct job *next;
 } t_job;
 
-extern t_job* jobsList;
+extern t_job *jobsList;
 
 static int numActiveJobs = 0;
