@@ -9,7 +9,6 @@
 #include <termios.h>
 #include "rShell.h"
 #include "rShell-defs.h"
-rahul
 #define FOREGROUND 'F'
 #define BACKGROUND 'B'
 #define SUSPENDED 'S'
