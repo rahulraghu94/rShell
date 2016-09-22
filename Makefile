@@ -1,7 +1,6 @@
 CFLAGS=-g -w -O2
 
 all: src/rShell.c rShell-defs.o 
-	-@mkdir build
 	gcc -g src/rShell.c src/*.o -o build/rShell.out
 
 rShell-defs.o: src/rShell-defs.c
